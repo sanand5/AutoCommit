@@ -17,6 +17,5 @@ EXTENSIONES_PERMITIDAS = [
         '.config', '.env'
     ]
 cambios = ""
-
-#genai.configure(api_key=os.environ["API_KEY"])
+genai.configure(api_key=os.environ["API_KEY"])
 MODEL = genai.GenerativeModel("gemini-1.5-flash")
