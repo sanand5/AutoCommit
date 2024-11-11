@@ -1,0 +1,396 @@
+En esta conversación, te proporcionaré la salida de mi `git diff HEAD`. Quiero que me ayudes a crear un único commit que englobe todos los cambios en castellano, utilizando títulos y mensajes apropiados para cada diff, siguiendo los consejos anteriores. La salida debe seguir estrictamente esta plantilla:
+`git commit -m "título descriptivo del commit" -m "mensaje del commit"`
+El título puede ser en inglés pero la descripción debe ser en castellano.
+Por favor, no incluyas ningún texto adicional.
+Ruta: a/TODO.md
+Cambios:
+new file mode 100644
+index 0000000..f6f2514
+--- /dev/null
++++ b/TODO.md
+@@ -0,0 +1 @@
++- Buscar el limite de tokens de gemini
+\ No newline at end of file
+
+
+Ruta: a/autocommit.py
+Cambios:
+new file mode 100644
+index 0000000..3a5bd42
+--- /dev/null
++++ b/autocommit.py
+@@ -0,0 +1,18 @@
++import config
++import gestor as g
++import menu as m
++import git as git
++
++def autocommit():
++    git.diffhead()
++    archivo_diff = config.DIFF_INPUT_FILE  # Archivo con los cambios en formato diff
++    config.cambios = g.leer_diff(archivo_diff, config.EXTENSIONES_PERMITIDAS)
++    seguir = True
++    while seguir:
++        tokens, difftoAI = g.tokenizar_cambios()
++        if len(tokens) > config.LIMITE_TOKENS:
++            print(f"Has superado el límite de tokens. {len(tokens)}/{config.LIMITE_TOKENS}")
++        seguir = m.menu()
++    tokens, difftoAI = g.tokenizar_cambios()
++    g.guardar(difftoAI)
++    return difftoAI
+
+
+Ruta: a/config.py
+Cambios:
+index 8b3d7df..17e43e2 100644
+--- a/config.py
++++ b/config.py
+@@ -1,12 +1,8 @@
+ import os
+ import google.generativeai as genai
+ 
+-LIMITE_TOKENS = 4096
+-PROMPT = """En esta conversación, te proporcionaré la salida de mi `git diff HEAD`. Quiero que me ayudes a crear un único commit que englobe todos los cambios, utilizando títulos y mensajes apropiados para cada diff, siguiendo los consejos anteriores. La salida debe seguir estrictamente esta plantilla:
+-`git commit -m "título descriptivo del commit" -m "mensaje del commit"`
+-El título puede ser en inglés pero la descripción debe ser en castellano.
+-Por favor, no incluyas ningún texto adicional."""
+ DIRECTORIO = os.path.dirname(os.path.abspath(__file__))
++#DIRECTORIO = os.path.dirname("/home/andreuet/IABD/")
+ OUTPUT_DIR = os.path.join(DIRECTORIO, 'output')
+ DIFF_INPUT_FILE = os.path.join(OUTPUT_DIR, 'diff.txt')
+ DIFF_FORMATED_FILE = os.path.join(OUTPUT_DIR, 'diff_formated.txt')
+@@ -16,6 +12,15 @@ EXTENSIONES_PERMITIDAS = [
+         '.txt', '.md', '.rst', '.log', '.csv', '.tsv', 
+         '.config', '.env'
+     ]
+-cambios = ""
+-genai.configure(api_key=os.environ["API_KEY"])
+-MODEL = genai.GenerativeModel("gemini-1.5-flash")
+\ No newline at end of file
++
++#genai.configure(api_key=os.environ["API_KEY"])
++MODEL = genai.GenerativeModel("gemini-1.5-flash")
++genai.configure(api_key="AIzaSyCuRrC6D-DbInVNrIRcU_1EWKrOYdAuBPk")
++LIMITE_TOKENS = 4096
++PROMPT = """En esta conversación, te proporcionaré la salida de mi `git diff HEAD`. Quiero que me ayudes a crear un único commit que englobe todos los cambios en castellano, utilizando títulos y mensajes apropiados para cada diff, siguiendo los consejos anteriores. La salida debe seguir estrictamente esta plantilla:
++`git commit -m "título descriptivo del commit" -m "mensaje del commit"`
++El título puede ser en inglés pero la descripción debe ser en castellano.
++Por favor, no incluyas ningún texto adicional."""
++
++
++cambios = ""
+\ No newline at end of file
+
+
+Ruta: a/diff_clear.py
+Cambios:
+deleted file mode 100644
+index 4f13850..0000000
+--- a/diff_clear.py
++++ /dev/null
+@@ -1,128 +0,0 @@
+-import config
+-import tiktoken
+-import os
+-import getcommit as gc
+-
+-
+-def __leer_diff(archivo_diff, extensiones_permitidas):
+-    cambios = {}
+-    ruta_actual = None
+-    contenido_diff = []
+-
+-    with open(archivo_diff, 'r') as f:
+-        for linea in f:
+-            # Verifica si la línea indica el inicio de un nuevo archivo
+-            if linea.startswith('diff --git'):
+-                if ruta_actual and contenido_diff:
+-                    # Filtrar cambios según la extensión del archivo
+-                    if not any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
+-                        cambios[ruta_actual] = "Modificaciones de este fichero"
+-                    else:
+-                        cambios[ruta_actual] = ''.join(contenido_diff)
+-
+-                contenido_diff = []  # Reinicia el contenido del diff
+-                # Extrae la ruta del nuevo archivo
+-                partes = linea.split()
+-                ruta_actual = partes[2] if len(partes) > 2 else None
+-            elif ruta_actual:  # Si hay un archivo actual, agrega su contenido
+-                contenido_diff.append(linea)
+-
+-        # Guarda el último archivo leído
+-        if ruta_actual and contenido_diff:
+-            if not any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
+-                cambios[ruta_actual] = "Modificaciones de este fichero"
+-            else:
+-                cambios[ruta_actual] = ''.join(contenido_diff)
+-
+-    return cambios
+-
+-def __tokenizar_cambios():
+-    # Convierte el diccionario de cambios a una sola cadena de texto
+-    cambios_str = "\n\n".join([f"Ruta: {ruta}\nCambios:\n{diff}" for ruta, diff in config.cambios.items()])
+-    difftogpt = config.PROMPT + "\n" + cambios_str
+-    # Tokeniza usando tiktoken
+-    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+-    tokens = enc.encode(difftogpt)
+-    return tokens, cambios_str, difftogpt
+-
+-def __menu_ficheros():
+-    print("Ficheros:")
+-    rutas = list(config.cambios.keys())
+-    for idx, ruta in enumerate(rutas, start=1):
+-        print(f"{idx}. {ruta}")
+-
+-    # Opción de salir
+-    print("\nOpciones:")
+-    print("0. Salir")
+-
+-    # Eliminar archivos por índice o por rango
+-    indices_a_eliminar = input("Introduce los ficheros a eliminar (separados por espacio o un rango como 7-10): ")
+-
+-    if indices_a_eliminar == "0":
+-        return False, config.cambios  # Salir del menú
+-
+-    # Procesar eliminación por rangos
+-    indices = set()
+-    for parte in indices_a_eliminar.split():
+-        if '-' in parte:
+-            start, end = parte.split('-')
+-            try:
+-                start, end = int(start), int(end)
+-                indices.update(range(start - 1, end))  # Restar 1 para índice 0 basado
+-            except ValueError:
+-                print("Rango no válido.")
+-        elif parte.isdigit():
+-            indices.add(int(parte) - 1)  # Restar 1 para índice 0 basado
+-
+-    # Elimina los archivos seleccionados
+-    rutas = list(config.cambios.keys())
+-    for idx in sorted(indices, reverse=True):
+-        if 0 <= idx < len(rutas):
+-            config.cambios.pop(rutas[idx], None)
+-    
+-    return True
+-
+-def __menu():
+-    print("¿Qué deseas hacer?")
+-    print("1. Elminar ficheros")
+-    print("2. Dividir en diferentes ficheros y salir")
+-    opcion = input("Elige una opción: ")
+-    if opcion == "1":
+-        __menu_ficheros()
+-        return True
+-    elif opcion == "2":
+-        return False
+-
+-def __dividir_y_guardar(cambios_str, tokens):
+-    # Si los tokens son mayores que el límite, divide en varias partes
+-    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+-    total_tokens = len(tokens)
+-
+-    if total_tokens > config.LIMITE_TOKENS:
+-        num_ficheros = (total_tokens // config.LIMITE_TOKENS) + 1
+-        tokens_por_fichero = total_tokens // num_ficheros
+-
+-        for i in range(num_ficheros):
+-            start = i * tokens_por_fichero
+-            end = start + tokens_por_fichero
+-            parte_tokens = tokens[start:end]
+-            parte_texto = enc.decode(parte_tokens)
+-            with open(os.path.join(config.OUTPUT_DIR, f"cambios_parte_{i + 1}.txt"), "w") as f:
+-                f.write(parte_texto)
+-    else:
+-        with open(config.DIFF_FORMATED_FILE, "w") as f:
+-            f.write(cambios_str)
+-    
+-def diff_clear():
+-    archivo_diff = config.DIFF_INPUT_FILE  # Archivo con los cambios en formato diff
+-    config.cambios = __leer_diff(archivo_diff, config.EXTENSIONES_PERMITIDAS)
+-    seguir = True
+-    while seguir:
+-        tokens, cambios_str, difftogpt = __tokenizar_cambios()
+-        if len(tokens) > config.LIMITE_TOKENS:
+-            print(f"Has superado el límite de tokens. {len(tokens)}/{config.LIMITE_TOKENS}")
+-        seguir = __menu()
+-    tokens, cambios_str, difftogpt = __tokenizar_cambios()
+-    __dividir_y_guardar(difftogpt, tokens)
+-    commit = gc.gemini(difftogpt).text
+-    print(commit)
+
+
+Ruta: a/gestor.py
+Cambios:
+new file mode 100644
+index 0000000..f85f710
+--- /dev/null
++++ b/gestor.py
+@@ -0,0 +1,80 @@
++import config
++import tiktoken
++
++def tokenizar_cambios():
++    cambios_str = "\n\n".join([f"Ruta: {ruta}\nCambios:\n{diff}" for ruta, diff in config.cambios.items()])
++    difftoAI = config.PROMPT + "\n" + cambios_str
++    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
++    tokens = enc.encode(difftoAI)
++    return tokens, difftoAI
++
++def guardar(cambios_str):
++    with open(config.DIFF_FORMATED_FILE, "w") as f:
++            f.write(cambios_str)
++
++def obtener_rutas():
++    return list(config.cambios.keys())
++
++def obtener_indices_a_eliminar():
++    return input("Introduce los ficheros a eliminar (separados por espacio o un rango como 7-10): ")
++
++def procesar_indices(indices_a_eliminar):
++    indices = set()
++    for parte in indices_a_eliminar.split():
++        if '-' in parte:
++            try:
++                start, end = map(int, parte.split('-'))
++                indices.update(range(start - 1, end))  # Restar 1 para índice basado en 0
++            except ValueError:
++                print("Rango no válido.")
++        elif parte.isdigit():
++            indices.add(int(parte) - 1)  # Restar 1 para índice basado en 0
++    return indices
++
++def eliminar_archivos(indices):
++    rutas = obtener_rutas()
++    for idx in sorted(indices, reverse=True):
++        if 0 <= idx < len(rutas):
++            config.cambios.pop(rutas[idx], None)
++
++def leer_diff(archivo_diff, extensiones_permitidas):
++    cambios = {}
++    ruta_actual = None
++    contenido_diff = []
++
++    with open(archivo_diff, 'r') as f:
++        for linea in f:
++            # Verifica si la línea indica el inicio de un nuevo archivo
++            if linea.startswith('diff --git'):
++                if ruta_actual and contenido_diff:
++                    # Filtrar cambios según la extensión del archivo
++                    if not any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
++                        cambios[ruta_actual] = "Modificaciones de este fichero"
++                    else:
++                        cambios[ruta_actual] = ''.join(contenido_diff)
++
++                contenido_diff = []  # Reinicia el contenido del diff
++                # Extrae la ruta del nuevo archivo
++                partes = linea.split()
++                ruta_actual = partes[2] if len(partes) > 2 else None
++            elif ruta_actual:  # Si hay un archivo actual, agrega su contenido
++                contenido_diff.append(linea)
++
++        # Guarda el último archivo leído
++        if ruta_actual and contenido_diff:
++            if not any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
++                cambios[ruta_actual] = "Modificaciones de este fichero"
++            else:
++                cambios[ruta_actual] = ''.join(contenido_diff)
++
++    return cambios
++
++
++def __gemini(msg):
++    response = config.MODEL.generate_content(msg)
++    return response
++
++def getcommit():
++    tokens, msg = tokenizar_cambios()
++    return __gemini(msg).text[1:-1]
++
+
+
+Ruta: a/getcommit.py
+Cambios:
+deleted file mode 100644
+index 5372f13..0000000
+--- a/getcommit.py
++++ /dev/null
+@@ -1,9 +0,0 @@
+-import config
+-
+-def gemini(msg):
+-    response = config.MODEL.generate_content(msg)
+-    return response
+-
+-
+-
+-
+
+
+Ruta: a/init.py
+Cambios:
+index 497787d..9be6fcc 100644
+--- a/init.py
++++ b/init.py
+@@ -1,10 +1,2 @@
+-import git
+-import diff_clear
+-
+-git.diffhead()
+-diff_clear.diff_clear()
+-
+-"""
+-TODO: 
+-Dividir los ficheros segun los el numero archivos i de tokens.
+-"""
+\ No newline at end of file
++import autocommit
++autocommit.autocommit()
+
+
+Ruta: a/menu.py
+Cambios:
+new file mode 100644
+index 0000000..1c760d0
+--- /dev/null
++++ b/menu.py
+@@ -0,0 +1,39 @@
++import config
++import gestor as g
++def __mostrar_menu_ficheros():
++    """Muestra el menú de ficheros."""
++    print("Ficheros:")
++    rutas = g.obtener_rutas()
++    for idx, ruta in enumerate(rutas, start=1):
++        print(f"{idx}. {ruta}")
++
++    print("\nOpciones:")
++    print("0. Salir")
++
++def __menu_ficheros():
++    """Función principal para el manejo del menú de ficheros."""
++    while True:
++        __mostrar_menu_ficheros()
++        indices_a_eliminar = g.obtener_indices_a_eliminar()
++        if indices_a_eliminar == "0":
++            return False, config.cambios
++        indices = g.procesar_indices(indices_a_eliminar)
++        g.eliminar_archivos(indices)
++        return True
++
++
++def menu():
++    print("¿Qué deseas hacer?")
++    print("1. Elminar ficheros")
++    print("2. Generar Commit")
++    print("3. Generar Commit y Salir")
++    opcion = input("Elige una opción: ")
++    if opcion == "1":
++        __menu_ficheros()
++        return True
++    elif opcion == "2":
++        print(g.getcommit())
++        return True
++    elif opcion == "3":
++        print(g.getcommit())
++        return False
+\ No newline at end of file

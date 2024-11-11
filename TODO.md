@@ -1,0 +1,2 @@
+- Buscar el limite de tokens de gemini
+- Añadir opciones hacer commit
