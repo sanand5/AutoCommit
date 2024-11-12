@@ -2,11 +2,7 @@ import config
 import gestor as g
 def __mostrar_menu_ficheros():
     """Muestra el menú de ficheros."""
-    print("Ficheros:")
-    rutas = g.obtener_rutas()
-    for idx, ruta in enumerate(rutas, start=1):
-        print(f"{idx}. {ruta}")
-
+    print(g.lista_ficheros())
     print("\nOpciones:")
     print("0. Salir")
 
@@ -25,8 +21,9 @@ def __menu_ficheros():
 def menu():
     print("¿Qué deseas hacer?")
     print("1. Elminar ficheros")
-    print("2. Generar Commit")
-    print("3. Git Commit")
+    print("2. Elminar ficheros con IA")
+    print("3. Generar Commit")
+    print("4. Git Commit y Salir")
 
     print("0. Salir")
     opcion = input("Elige una opción: ")
@@ -35,7 +32,10 @@ def menu():
     elif opcion == "1":
         __menu_ficheros()
     elif opcion == "2":
-        print(g.getcommit())
+        g.getFicherosAI()
     elif opcion == "3":
-        print(g.hacer_commit())
+        g.getcommit()
+        return True
+    elif opcion == "4":
+        return not g.hacer_commit()
     return True
