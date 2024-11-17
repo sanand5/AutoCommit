@@ -1,2 +1,3 @@
 - Limpiar Codigo
 - Gestionar Errores
+- Añadir por consola gac i la ruta del repo por ejemplo .
