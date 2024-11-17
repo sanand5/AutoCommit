@@ -1,0 +1,30 @@
+gac() {
+    # Definir las rutas de los scripts
+    script_g="/home/andreuet/MyPrograms/AutoCommit/autocommit.sh"
+    script_t="/home/andreuet/Projects/AutoCommit/autocommit.sh"
+
+    opcion="g"  # Opción por defecto
+    ruta="."
+
+    # Procesar opciones
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -g) opcion="g"; shift ;;
+            -t) opcion="t"; shift ;;
+            *) ruta="$1"; shift ;;
+        esac
+    done
+
+    # Validar que la ruta existe
+    if [[ ! -d "$ruta" ]]; then
+        echo "Error: La ruta especificada '$ruta' no existe."
+        return 1
+    fi
+
+    # Ejecutar el script correspondiente
+    if [[ "$opcion" == "g" ]]; then
+        bash "$script_g" "$ruta"
+    elif [[ "$opcion" == "t" ]]; then
+        bash "$script_t" "$ruta"
+    fi
+}

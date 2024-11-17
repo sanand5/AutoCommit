@@ -1,3 +1,4 @@
 - Limpiar Codigo
 - Gestionar Errores
-- Añadir por consola gac i la ruta del repo por ejemplo .
+- Actualizar requirement
+- Actualizar REademi, añadir en reademe lo de para el comando
