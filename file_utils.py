@@ -43,3 +43,4 @@ def guardar(cambios_str):
     """Guarda los cambios formateados en un archivo."""
     with open(config.DIFF_FORMATED_FILE, "w") as f:
         f.write(cambios_str)
+
