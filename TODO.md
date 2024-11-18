@@ -1,4 +1,5 @@
 - Limpiar Codigo
 - Gestionar Errores
-- Actualizar requirement
-- Actualizar REademi, añadir en reademe lo de para el comando
+
+## Nuevas Funcionalidades
+introducir un fichero .autocommitignore en el repositorio donde introducir que ficheros o carpetas no se deven introducir en el repositorio.

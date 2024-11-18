@@ -1,11 +1,14 @@
+import os
+import sys
+
 import config
 import gestor as g
 import menu as m
 import git as git
-import sys
 
 def autocommit():
-    config.REPOSITORIO = sys.argv[1]
+    #config.REPOSITORIO = os.path.abspath(sys.argv[1])
+    config.REPOSITORIO = os.path.abspath(".")
     g.print_info()
     g.diffhead()
     config.cambios = g.leer_diff(config.DIFF_INPUT_FILE, config.EXTENSIONES_PERMITIDAS)
