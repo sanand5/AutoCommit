@@ -2,8 +2,7 @@ import os
 import google.generativeai as genai
 
 DIRECTORIO = os.path.dirname(os.path.abspath(__file__))
-REPOSITORIO = DIRECTORIO
-REPOSITORIO = "/home/andreuet/IABD/"
+REPOSITORIO = None
 OUTPUT_DIR = os.path.join(DIRECTORIO, 'output')
 DIFF_INPUT_FILE = os.path.join(OUTPUT_DIR, 'diff.txt')
 DIFF_FORMATED_FILE = os.path.join(OUTPUT_DIR, 'diff_formated.txt')
