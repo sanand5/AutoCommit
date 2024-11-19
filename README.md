@@ -5,6 +5,7 @@ AutoCommit es una herramienta que simplifica la creación de commits en Git util
 ## Funcionalidades
 - Generación automática de mensajes de commit usando un modelo de IA.
 - Filtrado de archivos en el git diff para excluir los irrelevantes.
+- Posibilidad de ignorar rutas específicas mediante un fichero `.autocommit`.
 - Integración con Git, incluyendo adición (git add), creación de diffs (git diff) y commits (git commit).
 - Interfaz de línea de comandos para una fácil interacción.
 - Compatibilidad con diferentes tipos de archivos para análisis de diffs.
@@ -33,7 +34,15 @@ El script de shell `autocommit.sh` permite ejecutar el proceso completo de gener
 ```bash
 bash autocommit.sh <ruta_del_repositorio>
 ```
+## Ignorar rutas con el fichero .autocommit
+Si se incluye un fichero .autocommit en el directorio raíz del repositorio, las rutas especificadas en su interior serán ignoradas al momento de generar el commit. Estas rutas pueden ser absolutas o relativas al repositorio.
 
+### Ejemplo de contenido de .autocommit:
+```
+/ruta/absoluta/a/ignorar
+directorio/relativo/a/ignorar
+archivo_relativo.txt
+```
 ## Menú de opciones
 Durante la ejecución, se te presentará un menú con las siguientes opciones:
 
@@ -41,15 +50,6 @@ Durante la ejecución, se te presentará un menú con las siguientes opciones:
 2. **Eliminar ficheros con IA**: Utiliza IA para sugerir archivos a eliminar del git diff.
 3. **Generar Commit**: Genera un mensaje de commit utilizando IA.
 4. **Git Commit y Salir**: Crea el commit con el mensaje generado y termina el proceso.
-
-## Archivos del proyecto
-- `gestor.py`: Contiene funciones para gestionar los diffs y procesar archivos.
-- `git.py`: Funciones para interactuar con Git (`git add`, `git commit`, `git diff`).
-- `menu.py`: Implementa el menú interactivo para la selección de opciones.
-- `config.py`: Configuración global del proyecto, incluyendo extensiones permitidas y prompts para IA.
-- `init.py`: Punto de entrada del programa.
-- `autocommit.py`: Función principal para la ejecución del autocommit.
-- `autocommit.sh`: Script de shell para activar el entorno virtual y ejecutar el programa.
 
 ## Requisitos
 - Python 3.8 o superior.

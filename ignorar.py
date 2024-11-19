@@ -30,15 +30,8 @@ def extraer_rutas_relativas(archivos):
                         if str(ignore).startswith(str(repo)):
                             relativa = str(ignore.relative_to(repo))
                         rutas_relativas.append(relativa)
-    
     return rutas_relativas
-
-def eliminar_archivos_de_cambios(rutas_a_eliminar):
-    for ruta in rutas_a_eliminar:
-        if ruta in config.cambios:
-            del config.cambios[ruta]
 
 def autocommitignore():
     rutas_autocommitignore = buscar_autocommitignore()
-    rutas_a_eliminar = extraer_rutas_relativas(rutas_autocommitignore)
-    eliminar_archivos_de_cambios(rutas_a_eliminar)
+    return extraer_rutas_relativas(rutas_autocommitignore)

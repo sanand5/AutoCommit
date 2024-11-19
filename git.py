@@ -10,11 +10,16 @@ def git_commit(mensaje_commit):
     """Realiza un commit con el mensaje especificado en el repositorio."""
     subprocess.run(mensaje_commit, cwd=config.REPOSITORIO, shell=True, check=True)
 
-def git_diff_head(diff_file_path):
-    """Genera el diff y lo escribe en diff.txt en el directorio de salida."""
+def git_diff_exclude(paths=None):
+    if paths is None:
+        paths = []
+
+    exclude_args = [f":!{path}" for path in paths]
+
+    command = ["git", "diff", "HEAD", "--", "."] + exclude_args
+
     try:
-        with open(diff_file_path, 'w') as diff_file:
-            subprocess.run(["git", "diff", "HEAD"], cwd=config.REPOSITORIO, stdout=diff_file, check=True)
-    except subprocess.CalledProcessError:
-        print("No se pudieron generar cambios. Asegúrate de que hay cambios para mostrar.")
-        exit(1)
+        with open(config.DIFF_INPUT_FILE, 'w') as diff_file:
+            subprocess.run(command, text=True, stdout=diff_file, check=True)
+    except subprocess.CalledProcessError as e:
+        print("Error al ejecutar git diff:", e)

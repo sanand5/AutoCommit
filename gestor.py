@@ -3,6 +3,7 @@ import git
 from file_utils import crear_directorio_output, anadir_salto_linea, leer_diff, guardar
 import google.api_core.exceptions as api_errors
 import os
+import ignorar
 
 
 def print_info():
@@ -12,16 +13,16 @@ def print_info():
     print(f"Directorio de salida del programa: {config.OUTPUT_DIR}")
     print(f"Modelo: {config.MODEL.model_name}")
     print(f"Límite de intentos: {config.LIMITE_INTENTOS}")
-    print()
 
 def diffhead():
     """Genera un diff del repositorio y lo guarda en un archivo."""
     git.git_add(".")
-    output_dir = crear_directorio_output(config.DIRECTORIO)
-    diff_file_path = os.path.join(output_dir, "diff.txt")
-    anadir_salto_linea(diff_file_path)
-    git.git_diff_head(diff_file_path)
-    print(f"Diff generado en: {diff_file_path}")
+
+    os.makedirs(config.OUTPUT_DIR, exist_ok=True)
+    anadir_salto_linea(config.DIFF_INPUT_FILE)
+
+    files_ignore = ignorar.autocommitignore()
+    git.git_diff_exclude(files_ignore)
 
 def anadir_prompt():
     """Genera el mensaje con los cambios a enviar a la IA."""

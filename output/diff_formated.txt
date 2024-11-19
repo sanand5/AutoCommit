@@ -6,427 +6,1035 @@ Esta es la salida de mi `git diff HEAD`. Quiero que generes un único commit que
 - El título puede ser en inglés pero la descripción debe ser en castellano.
 Solo debes generar una unica salida
 
-Ruta: a/README.md
-Cambios:
-index 53925aa..fb134fc 100644
---- a/README.md
-+++ b/README.md
-@@ -1 +1,64 @@
--# AutoCommit
-\ No newline at end of file
-+# AutoCommit - Generación Automática de Commits
-+## Descripción
-+AutoCommit es una herramienta que simplifica la creación de commits en Git utilizando la API de Google Generative AI. Facilita la generación automática de mensajes de commit basados en los cambios detectados en el repositorio y permite filtrar archivos de forma manual o automatizada usando inteligencia artificial.
-+
-+## Funcionalidades
-+- Generación automática de mensajes de commit usando un modelo de IA.
-+- Filtrado de archivos en el git diff para excluir los irrelevantes.
-+- Integración con Git, incluyendo adición (git add), creación de diffs (git diff) y commits (git commit).
-+- Interfaz de línea de comandos para una fácil interacción.
-+- Compatibilidad con diferentes tipos de archivos para análisis de diffs.
-+
-+## Instalación
-+### Clonar el repositorio:
-+```bash
-+git clone <URL_DEL_REPOSITORIO>
-+cd AutoCommit
-+```
-+### Instalar dependencias:
-+```bash
-+python3 -m venv venv_autocommit
-+source venv_autocommit/bin/activate
-+pip install -r requirements.txt
-+```
-+### Configurar la API Key de Google Generative AI:
-+Asegúrate de tener configurada la variable de entorno `API_KEY` con tu clave de API:
-+```bash
-+export API_KEY="tu_api_key"
-+```
-+
-+## Uso
-+### Comando principal
-+El script de shell `autocommit.sh` permite ejecutar el proceso completo de generación de commits:
-+```bash
-+bash autocommit.sh <ruta_del_repositorio>
-+```
-+
-+## Menú de opciones
-+Durante la ejecución, se te presentará un menú con las siguientes opciones:
-+
-+1. **Eliminar ficheros manualmente**: Permite seleccionar archivos del git diff para eliminar manualmente.
-+2. **Eliminar ficheros con IA**: Utiliza IA para sugerir archivos a eliminar del git diff.
-+3. **Generar Commit**: Genera un mensaje de commit utilizando IA.
-+4. **Git Commit y Salir**: Crea el commit con el mensaje generado y termina el proceso.
-+
-+## Archivos del proyecto
-+- `gestor.py`: Contiene funciones para gestionar los diffs y procesar archivos.
-+- `git.py`: Funciones para interactuar con Git (`git add`, `git commit`, `git diff`).
-+- `menu.py`: Implementa el menú interactivo para la selección de opciones.
-+- `config.py`: Configuración global del proyecto, incluyendo extensiones permitidas y prompts para IA.
-+- `init.py`: Punto de entrada del programa.
-+- `autocommit.py`: Función principal para la ejecución del autocommit.
-+- `autocommit.sh`: Script de shell para activar el entorno virtual y ejecutar el programa.
-+
-+## Requisitos
-+- Python 3.8 o superior.
-+- Acceso a la API de Google Generative AI.
-+- Git instalado y configurado.
-+
-+## Contribuir
-+1. Haz un fork del proyecto.
-+2. Crea una nueva rama (`git checkout -b feature/nueva-funcionalidad`).
-+3. Realiza tus cambios y haz commit (`git commit -m "Agregar nueva funcionalidad"`).
-+4. Envía tus cambios (`git push origin feature/nueva-funcionalidad`).
-+5. Crea un Pull Request.
-
-
-Ruta: a/TODO.md
-Cambios:
-index 8672f59..bdf384f 100644
---- a/TODO.md
-+++ b/TODO.md
-@@ -1,4 +1,5 @@
- - Limpiar Codigo
- - Gestionar Errores
--- Actualizar requirement
--- Actualizar REademi, añadir en reademe lo de para el comando
-\ No newline at end of file
-+
-+## Nuevas Funcionalidades
-+introducir un fichero .autocommitignore en el repositorio donde introducir que ficheros o carpetas no se deven introducir en el repositorio.
-\ No newline at end of file
-
-
-Ruta: a/comando.txt
-Cambios:
-similarity index 100%
-rename from comando.txt
-rename to alias.txt
-
-
-Ruta: a/autocommit.py
-Cambios:
-index 446e602..7c43fe5 100644
---- a/autocommit.py
-+++ b/autocommit.py
-@@ -1,11 +1,14 @@
-+import os
-+import sys
-+
- import config
- import gestor as g
- import menu as m
- import git as git
--import sys
- 
- def autocommit():
--    config.REPOSITORIO = sys.argv[1]
-+    #config.REPOSITORIO = os.path.abspath(sys.argv[1])
-+    config.REPOSITORIO = os.path.abspath(".")
-     g.print_info()
-     g.diffhead()
-     config.cambios = g.leer_diff(config.DIFF_INPUT_FILE, config.EXTENSIONES_PERMITIDAS)
-
-
-Ruta: a/autocommit.sh
-Cambios:
-index a21f25a..bd3c359 100755
---- a/autocommit.sh
-+++ b/autocommit.sh
-@@ -2,10 +2,11 @@
- 
- ruta=$1
- # Activar el entorno virtual
--source ./venv_autocommit/bin/activate
-+dir="$(dirname "$(realpath "$0")")"
-+source "$dir/venv_autocommit/bin/activate"
- 
- # Ejecutar el script de Python
--python3 ./init.py $ruta
-+python3 "$dir/init.py" $ruta
- 
- # Desactivar el entorno virtual (opcional)
- deactivate
-
-
-Ruta: a/file_utils.py
+Ruta: a/BDA/1Ava/ut_04/flows09.json
 Cambios:
 new file mode 100644
-index 0000000..5a4a1a8
+index 00000000..369af8d0
 --- /dev/null
-+++ b/file_utils.py
-@@ -0,0 +1,45 @@
-+import os
-+import re
-+import config
-+
-+def crear_directorio_output(directorio_script):
-+    """Crea el directorio output si no existe."""
-+    output_dir = os.path.join(directorio_script, "output")
-+    os.makedirs(output_dir, exist_ok=True)
-+    return output_dir
-+
-+def anadir_salto_linea(diff_file_path):
-+    """Añade un salto de línea al archivo diff.txt."""
-+    with open(diff_file_path, 'a') as diff_file:
-+        diff_file.write("\n")
-+
-+def leer_diff(archivo_diff, extensiones_permitidas):
-+    """Lee un archivo diff y filtra por extensiones permitidas."""
-+    cambios = {}
-+    ruta_actual = None
-+    contenido_diff = []
-+
-+    with open(archivo_diff, 'r') as f:
-+        for linea in f:
-+            if linea.startswith('diff --git'):
-+                if ruta_actual and contenido_diff:
-+                    if any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
-+                        cambios[ruta_actual] = ''.join(contenido_diff)
-+
-+                contenido_diff = []  # Reinicia el contenido del diff
-+                match = re.match(r'diff --git (a/.+) (b/.+)', linea)
-+                if match:
-+                    ruta_actual = match.group(1)  # La ruta del archivo a
-+            elif ruta_actual:
-+                contenido_diff.append(linea)
-+
-+        if ruta_actual and contenido_diff:
-+            if any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
-+                cambios[ruta_actual] = ''.join(contenido_diff)
-+
-+    return cambios
-+
-+def guardar(cambios_str):
-+    """Guarda los cambios formateados en un archivo."""
-+    with open(config.DIFF_FORMATED_FILE, "w") as f:
-+        f.write(cambios_str)
++++ b/BDA/1Ava/ut_04/flows09.json
+@@ -0,0 +1,386 @@
++[
++    {
++        "id": "3f889bfad65f8b2f",
++        "type": "tab",
++        "label": "Flujo 1",
++        "disabled": false,
++        "info": "",
++        "env": []
++    },
++    {
++        "id": "11eb490e9c4a8c33",
++        "type": "group",
++        "z": "3f889bfad65f8b2f",
++        "name": "Nodo Catch",
++        "style": {
++            "label": true,
++            "label-position": "n"
++        },
++        "nodes": [
++            "e95efc34cc3e1",
++            "functionNode",
++            "catchNode",
++            "debugNode"
++        ],
++        "x": 214,
++        "y": 59,
++        "w": 402,
++        "h": 182
++    },
++    {
++        "id": "285ddd4df351fa37",
++        "type": "group",
++        "z": "3f889bfad65f8b2f",
++        "style": {
++            "stroke": "#999999",
++            "stroke-opacity": "1",
++            "fill": "none",
++            "fill-opacity": "1",
++            "label": true,
++            "label-position": "nw",
++            "color": "#a4a4a4"
++        },
++        "nodes": [
++            "5697fe0d6b96c8bf",
++            "b04865783ea27d06",
++            "d60d9ecbd4a3952b",
++            "28217ff9ad0ca692",
++            "382cf1ddace1566d",
++            "8fdd51f2f793bce6"
++        ],
++        "x": 94,
++        "y": 279,
++        "w": 642,
++        "h": 242
++    },
++    {
++        "id": "b79702c8db340af6",
++        "type": "group",
++        "z": "3f889bfad65f8b2f",
++        "name": "Envio TCP",
++        "style": {
++            "stroke": "#000000",
++            "fill": "#b797cf",
++            "label": true,
++            "label-position": "n",
++            "color": "#ffffff"
++        },
++        "nodes": [
++            "db80360405c497bf",
++            "1e78797c64ea7c93",
++            "645dfa9575dd1f25",
++            "3ae7e3a26252e20f",
++            "6118272bb3725262"
++        ],
++        "x": 94,
++        "y": 579,
++        "w": 672,
++        "h": 222
++    },
++    {
++        "id": "e95efc34cc3e1",
++        "type": "inject",
++        "z": "3f889bfad65f8b2f",
++        "g": "11eb490e9c4a8c33",
++        "name": "Iniciar flujo",
++        "props": [],
++        "repeat": "",
++        "crontab": "",
++        "once": false,
++        "topic": "",
++        "payload": "",
++        "payloadType": "date",
++        "x": 320,
++        "y": 100,
++        "wires": [
++            [
++                "functionNode"
++            ]
++        ]
++    },
++    {
++        "id": "functionNode",
++        "type": "function",
++        "z": "3f889bfad65f8b2f",
++        "g": "11eb490e9c4a8c33",
++        "name": "Generar error",
++        "func": "node.error('Error simulado', msg);",
++        "outputs": 0,
++        "noerr": 0,
++        "initialize": "",
++        "finalize": "",
++        "libs": [],
++        "x": 510,
++        "y": 100,
++        "wires": []
++    },
++    {
++        "id": "catchNode",
++        "type": "catch",
++        "z": "3f889bfad65f8b2f",
++        "g": "11eb490e9c4a8c33",
++        "name": "Captura errores",
++        "scope": null,
++        "uncaught": false,
++        "x": 320,
++        "y": 200,
++        "wires": [
++            [
++                "debugNode"
++            ]
++        ]
++    },
++    {
++        "id": "debugNode",
++        "type": "debug",
++        "z": "3f889bfad65f8b2f",
++        "g": "11eb490e9c4a8c33",
++        "name": "Ver error",
++        "active": true,
++        "tosidebar": true,
++        "console": false,
++        "complete": "true",
++        "statusVal": "",
++        "statusType": "auto",
++        "x": 510,
++        "y": 200,
++        "wires": []
++    },
++    {
++        "id": "5697fe0d6b96c8bf",
++        "type": "inject",
++        "z": "3f889bfad65f8b2f",
++        "g": "285ddd4df351fa37",
++        "name": "Iniciar proceso",
++        "props": [],
++        "repeat": "",
++        "crontab": "",
++        "once": false,
++        "topic": "",
++        "payload": "",
++        "payloadType": "date",
++        "x": 220,
++        "y": 380,
++        "wires": [
++            [
++                "b04865783ea27d06"
++            ]
++        ]
++    },
++    {
++        "id": "b04865783ea27d06",
++        "type": "delay",
++        "z": "3f889bfad65f8b2f",
++        "g": "285ddd4df351fa37",
++        "name": "Retraso de 5 seg",
++        "pauseType": "delay",
++        "timeout": "5",
++        "timeoutUnits": "seconds",
++        "rate": "1",
++        "nbRateUnits": "1",
++        "rateUnits": "second",
++        "randomFirst": "1",
++        "randomLast": "5",
++        "randomUnits": "seconds",
++        "drop": false,
++        "outputs": 1,
++        "x": 410,
++        "y": 380,
++        "wires": [
++            [
++                "28217ff9ad0ca692"
++            ]
++        ]
++    },
++    {
++        "id": "d60d9ecbd4a3952b",
++        "type": "complete",
++        "z": "3f889bfad65f8b2f",
++        "g": "285ddd4df351fa37",
++        "name": "Detecta completado",
++        "scope": [
++            "b04865783ea27d06"
++        ],
++        "x": 220,
++        "y": 480,
++        "wires": [
++            [
++                "382cf1ddace1566d"
++            ]
++        ]
++    },
++    {
++        "id": "28217ff9ad0ca692",
++        "type": "debug",
++        "z": "3f889bfad65f8b2f",
++        "g": "285ddd4df351fa37",
++        "name": "Salida retrasada",
++        "active": true,
++        "tosidebar": true,
++        "console": false,
++        "complete": "true",
++        "statusVal": "",
++        "statusType": "auto",
++        "x": 610,
++        "y": 380,
++        "wires": []
++    },
++    {
++        "id": "382cf1ddace1566d",
++        "type": "debug",
++        "z": "3f889bfad65f8b2f",
++        "g": "285ddd4df351fa37",
++        "name": "Nodo completo",
++        "active": true,
++        "tosidebar": true,
++        "console": false,
++        "complete": "true",
++        "statusVal": "",
++        "statusType": "auto",
++        "x": 410,
++        "y": 480,
++        "wires": []
++    },
++    {
++        "id": "8fdd51f2f793bce6",
++        "type": "comment",
++        "z": "3f889bfad65f8b2f",
++        "g": "285ddd4df351fa37",
++        "name": "",
++        "info": "El nodo Complete detecta cuando otros nodos\n han terminado de procesar un mensaje. \n Es útil para ejecutar acciones después de\n  que un nodo haya completado su trabajo.",
++        "x": 420,
++        "y": 320,
++        "wires": []
++    },
++    {
++        "id": "db80360405c497bf",
++        "type": "inject",
++        "z": "3f889bfad65f8b2f",
++        "g": "b79702c8db340af6",
++        "name": "",
++        "props": [
++            {
++                "p": "payload"
++            },
++            {
++                "p": "topic",
++                "vt": "str"
++            }
++        ],
++        "repeat": "",
++        "crontab": "",
++        "once": false,
++        "onceDelay": 0.1,
++        "topic": "",
++        "payload": "Hola prueba envio via TCP",
++        "payloadType": "str",
++        "x": 190,
++        "y": 680,
++        "wires": [
++            [
++                "1e78797c64ea7c93"
++            ]
++        ]
++    },
++    {
++        "id": "1e78797c64ea7c93",
++        "type": "tcp out",
++        "z": "3f889bfad65f8b2f",
++        "g": "b79702c8db340af6",
++        "name": "",
++        "host": "localhost",
++        "port": "1045",
++        "beserver": "client",
++        "base64": false,
++        "end": false,
++        "tls": "",
++        "x": 510,
++        "y": 680,
++        "wires": []
++    },
++    {
++        "id": "645dfa9575dd1f25",
++        "type": "tcp in",
++        "z": "3f889bfad65f8b2f",
++        "g": "b79702c8db340af6",
++        "name": "monitorización",
++        "server": "server",
++        "host": "",
++        "port": "1045",
++        "datamode": "stream",
++        "datatype": "utf8",
++        "newline": "",
++        "topic": "",
++        "trim": false,
++        "base64": false,
++        "tls": "",
++        "x": 190,
++        "y": 760,
++        "wires": [
++            [
++                "3ae7e3a26252e20f"
++            ]
++        ]
++    },
++    {
++        "id": "3ae7e3a26252e20f",
++        "type": "debug",
++        "z": "3f889bfad65f8b2f",
++        "g": "b79702c8db340af6",
++        "name": "debug 3",
++        "active": true,
++        "tosidebar": true,
++        "console": false,
++        "tostatus": false,
++        "complete": "false",
++        "statusVal": "",
++        "statusType": "auto",
++        "x": 660,
++        "y": 760,
++        "wires": []
++    },
++    {
++        "id": "6118272bb3725262",
++        "type": "comment",
++        "z": "3f889bfad65f8b2f",
++        "g": "b79702c8db340af6",
++        "name": "Descripción",
++        "info": "Envio y recepción de mensajes\n a través de conexiones TCP",
++        "x": 370,
++        "y": 620,
++        "wires": []
++    },
++    {
++        "id": "3e4f0e5d71371534",
++        "type": "status",
++        "z": "3f889bfad65f8b2f",
++        "name": "Monitor de estado",
++        "scope": [
++            "1e78797c64ea7c93"
++        ],
++        "x": 270,
++        "y": 860,
++        "wires": [
++            [
++                "e73c096fab0de9aa"
++            ]
++        ]
++    },
++    {
++        "id": "e73c096fab0de9aa",
++        "type": "debug",
++        "z": "3f889bfad65f8b2f",
++        "name": "Estado envio",
++        "active": true,
++        "tosidebar": true,
++        "console": false,
++        "tostatus": false,
++        "complete": "true",
++        "targetType": "full",
++        "statusVal": "",
++        "statusType": "auto",
++        "x": 590,
++        "y": 860,
++        "wires": []
++    }
++]
+\ No newline at end of file
 
 
-Ruta: a/gestor.py
-Cambios:
-index 613fb17..07cbb0a 100644
---- a/gestor.py
-+++ b/gestor.py
-@@ -1,18 +1,21 @@
- import config
- import git
--import os
--import re
-+from file_utils import crear_directorio_output, anadir_salto_linea, leer_diff, guardar
- import google.api_core.exceptions as api_errors
-+import os
-+
- 
- def print_info():
-+    """Muestra información relevante de la configuración."""
-     print(f"Directorio actual: {config.DIRECTORIO}")
-     print(f"Repositorio: {config.REPOSITORIO}")
--    print(f"Directorio de salida de el programa: {config.OUTPUT_DIR}")
-+    print(f"Directorio de salida del programa: {config.OUTPUT_DIR}")
-     print(f"Modelo: {config.MODEL.model_name}")
--    print(f"Limite de intentos: {config.LIMITE_INTENTOS}")
-+    print(f"Límite de intentos: {config.LIMITE_INTENTOS}")
-     print()
- 
- def diffhead():
-+    """Genera un diff del repositorio y lo guarda en un archivo."""
-     git.git_add(".")
-     output_dir = crear_directorio_output(config.DIRECTORIO)
-     diff_file_path = os.path.join(output_dir, "diff.txt")
-@@ -20,33 +23,21 @@ def diffhead():
-     git.git_diff_head(diff_file_path)
-     print(f"Diff generado en: {diff_file_path}")
- 
--def crear_directorio_output(directorio_script):
--    """Crea el directorio output si no existe."""
--    output_dir = os.path.join(directorio_script, "output")
--    os.makedirs(output_dir, exist_ok=True)
--    return output_dir
--
--def anadir_salto_linea(diff_file_path):
--    """Añade un salto de línea al archivo diff.txt."""
--    with open(diff_file_path, 'a') as diff_file:
--        diff_file.write("\n")
--
- def anadir_prompt():
-+    """Genera el mensaje con los cambios a enviar a la IA."""
-     cambios_str = "\n\n".join([f"Ruta: {ruta}\nCambios:\n{diff}" for ruta, diff in config.cambios.items()])
--    difftoAI = config.PROMPT + "\n" + cambios_str
--    return difftoAI
--
--def guardar(cambios_str):
--    with open(config.DIFF_FORMATED_FILE, "w") as f:
--            f.write(cambios_str)
-+    return config.PROMPT + "\n" + cambios_str
- 
- def obtener_rutas():
-+    """Obtiene las rutas de los cambios registrados."""
-     return list(config.cambios.keys())
- 
- def obtener_indices_a_eliminar():
-+    """Solicita los índices de archivos a eliminar."""
-     return input("Introduce los ficheros a eliminar (separados por espacio o un rango como 7-10): ")
- 
- def procesar_indices(indices_a_eliminar):
-+    """Procesa los índices ingresados para determinar los archivos a eliminar."""
-     indices = set()
-     for parte in indices_a_eliminar.split():
-         if '-' in parte:
-@@ -60,52 +51,25 @@ def procesar_indices(indices_a_eliminar):
-     return indices
- 
- def eliminar_archivos(indices):
-+    """Elimina los archivos según los índices proporcionados."""
-     rutas = obtener_rutas()
-     for idx in sorted(indices, reverse=True):
-         if 0 <= idx < len(rutas):
-             config.cambios.pop(rutas[idx], None)
- 
--def leer_diff(archivo_diff, extensiones_permitidas):
--    cambios = {}
--    ruta_actual = None
--    contenido_diff = []
--
--    with open(archivo_diff, 'r') as f:
--        for linea in f:
--            # Verifica si la línea indica el inicio de un nuevo archivo
--            if linea.startswith('diff --git'):
--                if ruta_actual and contenido_diff:
--                    # Filtrar cambios según la extensión del archivo
--                    if any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
--                        cambios[ruta_actual] = ''.join(contenido_diff)
--
--                contenido_diff = []  # Reinicia el contenido del diff
--                # Usamos expresión regular para obtener las rutas de los archivos (con espacios)
--                match = re.match(r'diff --git (a/.+) (b/.+)', linea)
--                if match:
--                    ruta_actual = match.group(1)  # La ruta del archivo a
--            elif ruta_actual:  # Si hay un archivo actual, agrega su contenido
--                contenido_diff.append(linea)
--
--        # Guarda el último archivo leído
--        if ruta_actual and contenido_diff:
--            if any(ruta_actual.endswith(ext) for ext in extensiones_permitidas):
--                cambios[ruta_actual] = ''.join(contenido_diff)
--
--    return cambios
--
--
- def __gemini(msg):
--    response = config.MODEL.generate_content(msg)
--    return response
-+    """Genera el contenido usando la IA configurada."""
-+    return config.MODEL.generate_content(msg)
- 
- def obtener_primera_linea_commit(texto):
-+    """Obtiene la primera línea de commit de un mensaje."""
-     for linea in texto.splitlines():
-         if linea.startswith("git commit"):
-             return linea
-     return None
- 
- def getcommit():
-+    """Obtiene un mensaje de commit generado por la IA."""
-     msg = anadir_prompt()
-     cont = 0
-     continuar = True
-@@ -113,7 +77,7 @@ def getcommit():
-     while continuar:
-         config.commit = obtener_primera_linea_commit(__gemini(msg).text)
-         
--        if config.commit != None:
-+        if config.commit:
-             continuar = False
-         else:
-             cont += 1
-@@ -123,31 +87,30 @@ def getcommit():
-     print(config.commit)
-     return True
- 
--
- def hacer_commit():
--    if config.commit != "":
--        if getcommit(): git.git_commit(config.commit)
--        else: 
-+    """Realiza el commit si el mensaje es válido."""
-+    if config.commit:
-+        if getcommit():
-+            git.git_commit(config.commit)
-+        else:
-             print("No se ha podido hacer el commit")
-             return False
--    else: 
-+    else:
-         print("No se ha podido hacer el commit")
-         return False
-     return True
- 
- def lista_ficheros():
--    rutas = obtener_rutas()  # Suponiendo que esta función devuelve las rutas
-+    """Genera una lista de archivos con sus índices."""
-+    rutas = obtener_rutas()
-     lista_ficheros = "Ficheros:\n"
-     for idx, ruta in enumerate(rutas, start=1):
-         lista_ficheros += f"\t{idx}. {ruta}\n"
-     return lista_ficheros
- 
- def getFicherosAI():
-+    """Obtiene los ficheros a eliminar mediante la IA."""
-     msg = config.PROMPT_FICHEROS + "\n" + lista_ficheros()
-     indices_a_eliminar = __gemini(msg).text    
-     indices = procesar_indices(indices_a_eliminar)
-     eliminar_archivos(indices)
--
--
--
--
-
-
-Ruta: a/ignore.py
+Ruta: a/BDA/1Ava/ut_04/flows10.json
 Cambios:
 new file mode 100644
-index 0000000..1bc5a3c
+index 00000000..4cde9f1c
 --- /dev/null
-+++ b/ignore.py
-@@ -0,0 +1,3 @@
-+# Leer ficheros autocommit
-+# Sacar todas las rutas absolutas de todo lo que hay que ignorar
-+# Eliminar esos ficheros de cambios
++++ b/BDA/1Ava/ut_04/flows10.json
+@@ -0,0 +1,54 @@
++[
++    {
++        "id": "2d52829ca5b22cfc",
++        "type": "tab",
++        "label": "Flujo 3",
++        "disabled": false,
++        "info": "",
++        "env": []
++    },
++    {
++        "id": "3cab0060f4d7861d",
++        "type": "kafkajs-producer",
++        "z": "2d52829ca5b22cfc",
++        "name": "Publisher",
++        "client": "db6e74e06b851241",
++        "topic": "",
++        "advancedoptions": false,
++        "acknowledge": "all",
++        "partition": "",
++        "headeritems": {},
++        "key": "",
++        "responsetimeout": 30000,
++        "transactiontimeout": 60000,
++        "metadatamaxage": 300000,
++        "allowautotopiccreation": false,
++        "x": 480,
++        "y": 120,
++        "wires": []
++    },
++    {
++        "id": "db6e74e06b851241",
++        "type": "kafkajs-client",
++        "name": "Kafka broker",
++        "brokers": "172.17.0.1:29092",
++        "clientid": "prueba",
++        "connectiontimeout": "3000",
++        "requesttimeout": "25000",
++        "advancedretry": false,
++        "maxretrytime": "30000",
++        "initialretrytime": "300",
++        "factor": "0.2",
++        "multiplier": "2",
++        "retries": "5",
++        "auth": "none",
++        "tlsselfsign": false,
++        "tlscacert": "",
++        "tlsclientcert": "",
++        "tlsprivatekey": "",
++        "tlspassphrase": "",
++        "saslssl": true,
++        "saslmechanism": "plain",
++        "loglevel": "error"
++    }
++]
+\ No newline at end of file
 
 
-Ruta: a/requirements.txt
+Ruta: a/MIA/Ut_02/8Puzzle.ipynb
+Cambios:
+index 1bbbdc9f..36265353 100644
+--- a/MIA/Ut_02/8Puzzle.ipynb
++++ b/MIA/Ut_02/8Puzzle.ipynb
+@@ -46,105 +46,164 @@
+   },
+   {
+    "cell_type": "code",
+-   "execution_count": 1,
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": [
++    "estado = (2, 8, 3, 1, 6, 4, 7, 0, 5)\n",
++    "solucio = (1, 2, 3, 4, 5, 6, 7, 8, 0)\n",
++    "nfilas, ncolumnas = 3, 3\n",
++    "lista_abierta = []\n",
++    "lisita_carrada = set()\n",
++    "distancia_manhatan = 0\n",
++    "finalizar = False"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": [
++    "def calcular_distancias_manhattan(estado_inicial, solucio):\n",
++    "    posiciones_solucion = {valor: (i // 3, i % 3) for i, valor in enumerate(solucio)}\n",
++    "    \n",
++    "    distancias = []\n",
++    "    \n",
++    "    for i, valor in enumerate(estado_inicial):\n",
++    "        if valor != 0:\n",
++    "            fila_actual, columna_actual = i // 3, i % 3\n",
++    "            fila_objetivo, columna_objetivo = posiciones_solucion[valor]\n",
++    "            distancia = abs(fila_actual - fila_objetivo) + abs(columna_actual - columna_objetivo)\n",
++    "            distancias.append(distancia)\n",
++    "        else:\n",
++    "            distancias.append(0)\n",
++    "    \n",
++    "    return sum(distancias)\n",
++    "\n",
++    "def calcular_movimientos(inicial):\n",
++    "    pos_cero = inicial.index(0)\n",
++    "    x, y = pos_cero // nfilas, pos_cero % ncolumnas\n",
++    "    movimientos = {\n",
++    "        'arriba': (-1, 0),\n",
++    "        'abajo': (1, 0),\n",
++    "        'izquierda': (0, -1),\n",
++    "        'derecha': (0, 1),\n",
++    "    }\n",
++    "    estados_posibles = []\n",
++    "\n",
++    "    for direccion, (delta_fila, delta_columna) in movimientos.items():\n",
++    "        nueva_fila = x + delta_fila\n",
++    "        nueva_columna = y + delta_columna\n",
++    "\n",
++    "        if 0 <= nueva_fila < nfilas and 0 <= nueva_columna < ncolumnas:\n",
++    "            nuevo_indice = nueva_fila * ncolumnas + nueva_columna\n",
++    "            nuevo_estado = list(inicial)\n",
++    "            nuevo_estado[pos_cero], nuevo_estado[nuevo_indice] = nuevo_estado[nuevo_indice], nuevo_estado[pos_cero]\n",
++    "            estados_posibles.append(tuple(nuevo_estado))\n",
++    "\n",
++    "    return estados_posibles\n",
++    "\n",
++    "def imprimir_puzzle(puzzle, manhatan):\n",
++    "    for i in range(nfilas):\n",
++    "        for j in range(ncolumnas):\n",
++    "            print(puzzle[i * ncolumnas + j], end=' ')\n",
++    "        print()\n",
++    "    print(f\"Distancia Manhatan: {manhatan}\\n\")\n",
++    "\n",
++    "def restart():\n",
++    "    global estado, solucio, nfilas, ncolumnas, lista_abierta, lisita_carrada, distancia_manhatan, finalizar\n",
++    "    estado = (2, 8, 3, 1, 6, 4, 7, 0, 5)\n",
++    "    solucio = (1, 2, 3, 4, 5, 6, 7, 8, 0)\n",
++    "    nfilas, ncolumnas = 3, 3\n",
++    "    lista_abierta = []\n",
++    "    lisita_carrada = []\n",
++    "    distancia_manhatan = 0\n",
++    "    finalizar = False\n"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": 32,
+    "metadata": {},
+    "outputs": [
+     {
+      "name": "stdout",
+      "output_type": "stream",
+      "text": [
+-      "No s'ha trobat cap solució.\n"
++      "2 8 3 \n",
++      "1 6 4 \n",
++      "7 0 5 \n",
++      "Distancia Manhatan: 9\n",
++      "\n"
++     ]
++    },
++    {
++     "ename": "KeyError",
++     "evalue": "9",
++     "output_type": "error",
++     "traceback": [
++      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
++      "\u001b[0;31mKeyError\u001b[0m                                  Traceback (most recent call last)",
++      "Cell \u001b[0;32mIn[32], line 19\u001b[0m\n\u001b[1;32m     17\u001b[0m manhatans \u001b[38;5;241m=\u001b[39m []\n\u001b[1;32m     18\u001b[0m \u001b[38;5;28;01mfor\u001b[39;00m fill \u001b[38;5;129;01min\u001b[39;00m lista_abierta:\n\u001b[0;32m---> 19\u001b[0m     manhatans\u001b[38;5;241m.\u001b[39mappend(\u001b[43mcalcular_distancias_manhattan\u001b[49m\u001b[43m(\u001b[49m\u001b[43mfill\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43msolucio\u001b[49m\u001b[43m)\u001b[49m)\n\u001b[1;32m     20\u001b[0m estado \u001b[38;5;241m=\u001b[39m lista_abierta[manhatans\u001b[38;5;241m.\u001b[39mindex(\u001b[38;5;28mmin\u001b[39m(manhatans))]\n\u001b[1;32m     21\u001b[0m lisita_carrada\u001b[38;5;241m.\u001b[39madd(estado)\n",
++      "Cell \u001b[0;32mIn[22], line 9\u001b[0m, in \u001b[0;36mcalcular_distancias_manhattan\u001b[0;34m(estado_inicial, estado_solucion)\u001b[0m\n\u001b[1;32m      7\u001b[0m \u001b[38;5;28;01mif\u001b[39;00m valor \u001b[38;5;241m!=\u001b[39m \u001b[38;5;241m0\u001b[39m:\n\u001b[1;32m      8\u001b[0m     fila_actual, columna_actual \u001b[38;5;241m=\u001b[39m i \u001b[38;5;241m/\u001b[39m\u001b[38;5;241m/\u001b[39m \u001b[38;5;241m3\u001b[39m, i \u001b[38;5;241m%\u001b[39m \u001b[38;5;241m3\u001b[39m\n\u001b[0;32m----> 9\u001b[0m     fila_objetivo, columna_objetivo \u001b[38;5;241m=\u001b[39m \u001b[43mposiciones_solucion\u001b[49m\u001b[43m[\u001b[49m\u001b[43mvalor\u001b[49m\u001b[43m]\u001b[49m\n\u001b[1;32m     10\u001b[0m     distancia \u001b[38;5;241m=\u001b[39m \u001b[38;5;28mabs\u001b[39m(fila_actual \u001b[38;5;241m-\u001b[39m fila_objetivo) \u001b[38;5;241m+\u001b[39m \u001b[38;5;28mabs\u001b[39m(columna_actual \u001b[38;5;241m-\u001b[39m columna_objetivo)\n\u001b[1;32m     11\u001b[0m     distancias\u001b[38;5;241m.\u001b[39mappend(distancia)\n",
++      "\u001b[0;31mKeyError\u001b[0m: 9"
+      ]
+     }
+    ],
+    "source": [
++    "import time as t\n",
+     "import heapq\n",
+     "\n",
+-    "def a_star(initial_state, goal_state):\n",
+-    "    open_set = []\n",
+-    "    heapq.heappush(open_set, (0, initial_state))\n",
+-    "    \n",
+-    "    costs = {initial_state: 0}\n",
+-    "    predecessors = {initial_state: None}\n",
+-    "    \n",
+-    "    while open_set:\n",
+-    "        current_cost, current_state = heapq.heappop(open_set)\n",
+-    "        \n",
+-    "        if current_state == goal_state:\n",
+-    "            return reconstruct_path(predecessors, current_state)\n",
+-    "        \n",
+-    "        for next_state, move_cost in generate_successors(current_state):\n",
+-    "            new_cost = costs[current_state] + move_cost\n",
+-    "            \n",
+-    "            if next_state not in costs or new_cost < costs[next_state]:\n",
+-    "                costs[next_state] = new_cost\n",
+-    "                priority = new_cost + heuristic(next_state, goal_state)\n",
+-    "                heapq.heappush(open_set, (priority, next_state))\n",
+-    "                predecessors[next_state] = current_state\n",
+-    "\n",
+-    "    return None  # Si no trobem solució\n",
+-    "\n",
+-    "def heuristic(state, goal_state):\n",
+-    "    return sum(abs(s % 3 - g % 3) + abs(s // 3 - g // 3) \n",
+-    "               for s, g in zip(state, goal_state) if s != 0)\n",
+-    "\n",
+-    "def generate_successors(state):\n",
+-    "    successors = []\n",
+-    "    zero_index = state.index(0)\n",
+-    "    row, col = divmod(zero_index, 3)\n",
+-    "    \n",
+-    "    moves = {\n",
+-    "        'up': (-1, 0),\n",
+-    "        'down': (1, 0),\n",
+-    "        'left': (0, -1),\n",
+-    "        'right': (0, 1)\n",
+-    "    }\n",
+-    "    \n",
+-    "    for move, (drow, dcol) in moves.items():\n",
+-    "        new_row, new_col = row + drow, col + dcol\n",
+-    "        if 0 <= new_row < 3 and 0 <= new_col < 3:\n",
+-    "            new_zero_index = new_row * 3 + new_col\n",
+-    "            new_state = list(state)\n",
+-    "            new_state[zero_index], new_state[new_zero_index] = new_state[new_zero_index], new_state[zero_index]\n",
+-    "            successors.append((tuple(new_state), 1))\n",
+-    "    \n",
+-    "    return successors\n",
+-    "\n",
+-    "def reconstruct_path(predecessors, current_state):\n",
+-    "    path = []\n",
+-    "    while predecessors[current_state] is not None:\n",
+-    "        path.append(current_state)\n",
+-    "        current_state = predecessors[current_state]\n",
+-    "    path.reverse()\n",
+-    "    return path\n",
+-    "\n",
+-    "def print_solution(solution):\n",
+-    "    for state in solution:\n",
+-    "        print(state)\n",
+-    "\n",
+-    "def main():\n",
+-    "    # Estat inicial i estat objectiu\n",
+-    "    initial_state = (2, 8, 3, 1, 6, 4, 7, 0, 5)\n",
+-    "    goal_state = (1, 2, 3, 4, 5, 6, 7, 8, 0)\n",
+-    "    \n",
+-    "    # Executar l'algorisme A*\n",
+-    "    solution = a_star(initial_state, goal_state)\n",
+-    "    \n",
+-    "    # Imprimir la solució\n",
+-    "    if solution is not None:\n",
+-    "        print(\"S'ha trobat una solució:\")\n",
+-    "        print_solution(solution)\n",
+-    "    else:\n",
+-    "        print(\"No s'ha trobat cap solució.\")\n",
+-    "\n",
+-    "if __name__ == \"__main__\":\n",
+-    "    main()\n"
++    "restart()\n",
++    "while not finalizar:\n",
++    "    distancia_manhatan = calcular_distancias_manhattan(estado, solucio)\n",
++    "    lista_abierta = calcular_movimientos(estado)\n",
++    "    h_inicial = calcular_distancias_manhattan(estado, solucio)\n",
++    "    heapq.heappush(lista_abierta, (h_inicial, estado))  # Empujar el estado inicial con f = h\n",
++    "\n",
++    "    # g(n) es el costo real hasta el nodo, h(n) es la heurística (distancia Manhattan)\n",
++    "    g = {estado: 0}\n",
++    "    h = {estado: h_inicial}\n",
++    "    came_from = {}  # Para reconstruir el camino\n",
++    "    imprimir_puzzle(estado, distancia_manhatan)\n",
++    "\n",
++    "    manhatans = []\n",
++    "    for fill in lista_abierta:\n",
++    "        manhatans.append(calcular_distancias_manhattan(fill, solucio))\n",
++    "    estado = lista_abierta[manhatans.index(min(manhatans))]\n",
++    "    lisita_carrada.add(estado)\n",
++    "    # Generar los estados posibles\n",
++    "    for vecino in calcular_movimientos(estado):\n",
++    "        if vecino in lisita_carrada:\n",
++    "            continue\n",
++    "\n",
++    "        tentative_g = g[estado] + 1  # Cada movimiento tiene un costo de 1\n",
++    "\n",
++    "        # Si no hemos visto este estado antes o encontramos una mejor ruta\n",
++    "        if vecino not in g or tentative_g < g[vecino]:\n",
++    "            g[vecino] = tentative_g\n",
++    "            h[vecino] = calcular_distancias_manhattan(vecino, solucio)\n",
++    "            f = g[vecino] + h[vecino]\n",
++    "            heapq.heappush(lista_abierta, (f, vecino))\n",
++    "            came_from[vecino] = estado\n",
++    "\n",
++    "    t.sleep(1)\n",
++    "    if estado == solucio:\n",
++    "        finalizar = True"
+    ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": []
+   }
+  ],
+  "metadata": {
+   "kernelspec": {
+-   "display_name": "mia_entorn",
++   "display_name": "laberinto",
+    "language": "python",
+    "name": "python3"
+   },
+
+
+Ruta: a/MIA/Ut_02/Camio.ipynb
 Cambios:
 new file mode 100644
-index 0000000..943d6a5
+index 00000000..a7236f8b
 --- /dev/null
-+++ b/requirements.txt
-@@ -0,0 +1,28 @@
-+annotated-types==0.7.0
-+cachetools==5.5.0
-+certifi==2024.8.30
-+charset-normalizer==3.4.0
-+google-ai-generativelanguage==0.6.10
-+google-api-core==2.23.0
-+google-api-python-client==2.153.0
-+google-auth==2.36.0
-+google-auth-httplib2==0.2.0
-+google-generativeai==0.8.3
-+googleapis-common-protos==1.66.0
-+grpcio==1.67.1
-+grpcio-status==1.67.1
-+httplib2==0.22.0
-+idna==3.10
-+proto-plus==1.25.0
-+protobuf==5.28.3
-+pyasn1==0.6.1
-+pyasn1_modules==0.4.1
-+pydantic==2.9.2
-+pydantic_core==2.23.4
-+pyparsing==3.2.0
-+requests==2.32.3
-+rsa==4.9
-+tqdm==4.67.0
-+typing_extensions==4.12.2
-+uritemplate==4.1.1
-+urllib3==2.2.3
++++ b/MIA/Ut_02/Camio.ipynb
+@@ -0,0 +1,88 @@
++{
++ "cells": [
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "# Exercici: Carregar un Camió amb Paquets\n",
++    "\n",
++    "## 1. Objectiu\n",
++    "Carregar un camió amb el màxim valor possible de paquets, respectant el pes màxim que el camió pot transportar.\n",
++    "\n",
++    "## 2. Descripció del Problema\n",
++    "Tens un camió amb una capacitat màxima de càrrega en quilograms, i una sèrie de paquets, cadascun amb un pes i un valor econòmic associat. La missió és trobar la combinació de paquets que maximitze el valor total transportat, però sense excedir la capacitat màxima del camió.\n",
++    "\n",
++    "Els algorismes de cerca que es poden emprar per trobar la millor solució són:\n",
++    "\n",
++    "- **Cerca en amplitud (BFS)**: Explora totes les combinacions de paquets, començant per les que tenen menys elements, per tal de garantir que troba la solució òptima.\n",
++    "- **Cerca en profunditat (DFS)**: Explora profundament cada possible combinació de paquets fins que arriba a una solució vàlida, tornant arrere si el pes màxim és superat.\n",
++    "- **Algorisme A\\***: Utilitza una funció heurística per estimar quin conjunt de paquets té més probabilitat de maximitzar el valor i optimitzar el procés de cerca.\n",
++    "\n",
++    "## 3. Dades d’Entrada\n",
++    "- **Capacitat del camió**: `W` (per exemple, 50 kg)\n",
++    "- **Llista de paquets disponibles**: Cada paquet està descrit per dos valors:\n",
++    "  - **pes**: el pes del paquet en kg\n",
++    "  - **valor**: el valor econòmic del paquet\n",
++    "\n",
++    "Per exemple:\n",
++    "\n",
++    "| Paquet | Pes (kg) | Valor (€) |\n",
++    "| ------ | -------- | --------- |\n",
++    "| 1      | 10       | 60        |\n",
++    "| 2      | 20       | 100       |\n",
++    "| 3      | 30       | 120       |\n",
++    "| 4      | 15       | 80        |\n",
++    "| 5      | 25       | 90        |\n",
++    "\n",
++    "## 4. Requisits\n",
++    "### 4.1 Cerca en amplitud (BFS)\n",
++    "- Explora totes les possibles combinacions de paquets sense tenir en compte l’ordre.\n",
++    "- Mantén una cua per a registrar tots els estats (combinacions de paquets).\n",
++    "- Troba la solució amb el màxim valor sense excedir el pes màxim.\n",
++    "\n",
++    "### 4.2 Cerca en profunditat (DFS)\n",
++    "- Utilitza una pila per a explorar profundament cada possible camí.\n",
++    "- Pot trobar solucions ràpides, però no necessàriament les òptimes.\n",
++    "\n",
++    "### 4.3 Algorisme A\\*\n",
++    "- Implementa una funció heurística per estimar la qualitat de cada conjunt de paquets.\n",
++    "- La funció heurística podria ser la relació entre el valor i el pes per tal de prioritzar els paquets amb més valor per unitat de pes.\n",
++    "\n",
++    "## 5. Solució\n",
++    "- Implementa les tres estratègies per comparar-ne els resultats:\n",
++    "  - Nombre de combinacions explorades fins a trobar la solució.\n",
++    "  - Valor total del camió per a cada estratègia.\n",
++    "\n",
++    "## 6. Tasques per a l’Alumnat\n",
++    "### 6.1 Implementació dels Algorismes\n",
++    "- Escriu el codi per a BFS, DFS i A* per resoldre aquest problema. Utilitza Python o qualsevol altre llenguatge amb el qual estigues còmode.\n",
++    "\n",
++    "### 6.2 Comparació dels Resultats\n",
++    "- Documenta les solucions trobades per cada estratègia.\n",
++    "- Explica quina de les tres estratègies és més eficient en termes de nombre de combinacions explorades.\n",
++    "\n",
++    "### 6.3 Reflexió\n",
++    "- Reflexiona sobre l’eficiència dels diferents algorismes per aquest tipus de problema.\n",
++    "- Quan creus que un algorisme com A* seria més avantatjós en comparació amb BFS o DFS?\n"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {
++    "vscode": {
++     "languageId": "plaintext"
++    }
++   },
++   "outputs": [],
++   "source": []
++  }
++ ],
++ "metadata": {
++  "language_info": {
++   "name": "python"
++  }
++ },
++ "nbformat": 4,
++ "nbformat_minor": 2
++}
+
+
+Ruta: a/MIA/Ut_02/puzzleIA.ipynb
+Cambios:
+new file mode 100644
+index 00000000..13c7ac08
+--- /dev/null
++++ b/MIA/Ut_02/puzzleIA.ipynb
+@@ -0,0 +1,196 @@
++{
++ "cells": [
++  {
++   "cell_type": "code",
++   "execution_count": 4,
++   "metadata": {},
++   "outputs": [
++    {
++     "name": "stdout",
++     "output_type": "stream",
++     "text": [
++      "No se pudo encontrar una solución.\n"
++     ]
++    }
++   ],
++   "source": [
++    "import heapq\n",
++    "import time as t\n",
++    "\n",
++    "estado_inicial = (2, 8, 3, 1, 6, 4, 7, 0, 5)\n",
++    "estado_inicial = (2, 8, 3, 1, 6, 4, 7, 5, 0)\n",
++    "estado_solucion = (1, 2, 3, 4, 5, 6, 7, 8, 0)\n",
++    "nfilas, ncolumnas = 3, 3\n",
++    "\n",
++    "# Función para calcular la distancia de Manhattan\n",
++    "def calcular_distancias_manhattan(estado_inicial, estado_solucion):\n",
++    "    posiciones_solucion = {valor: (i // 3, i % 3) for i, valor in enumerate(estado_solucion)}\n",
++    "    distancias = []\n",
++    "    \n",
++    "    for i, valor in enumerate(estado_inicial):\n",
++    "        if valor != 0:\n",
++    "            fila_actual, columna_actual = i // 3, i % 3\n",
++    "            fila_objetivo, columna_objetivo = posiciones_solucion[valor]\n",
++    "            distancia = abs(fila_actual - fila_objetivo) + abs(columna_actual - columna_objetivo)\n",
++    "            distancias.append(distancia)\n",
++    "        else:\n",
++    "            distancias.append(0)\n",
++    "    \n",
++    "    return sum(distancias)\n",
++    "\n",
++    "# Función para calcular los movimientos posibles\n",
++    "def calcular_movimientos(estado_inicial):\n",
++    "    pos_cero = estado_inicial.index(0)\n",
++    "    x, y = pos_cero // nfilas, pos_cero % ncolumnas\n",
++    "    movimientos = {\n",
++    "        'arriba': (-1, 0),\n",
++    "        'abajo': (1, 0),\n",
++    "        'izquierda': (0, -1),\n",
++    "        'derecha': (0, 1),\n",
++    "    }\n",
++    "    estados_posibles = []\n",
++    "\n",
++    "    for direccion, (delta_fila, delta_columna) in movimientos.items():\n",
++    "        nueva_fila = x + delta_fila\n",
++    "        nueva_columna = y + delta_columna\n",
++    "\n",
++    "        if 0 <= nueva_fila < nfilas and 0 <= nueva_columna < ncolumnas:\n",
++    "            nuevo_indice = nueva_fila * ncolumnas + nueva_columna\n",
++    "            nuevo_estado = list(estado_inicial)\n",
++    "            nuevo_estado[pos_cero], nuevo_estado[nuevo_indice] = nuevo_estado[nuevo_indice], nuevo_estado[pos_cero]\n",
++    "            estados_posibles.append(tuple(nuevo_estado))\n",
++    "\n",
++    "    return estados_posibles\n",
++    "\n",
++    "# Función para imprimir el puzzle\n",
++    "def imprimir_puzzle(puzzle, manhattan):\n",
++    "    for i in range(nfilas):\n",
++    "        for j in range(ncolumnas):\n",
++    "            print(puzzle[i * ncolumnas + j], end=' ')\n",
++    "        print()\n",
++    "    print(f\"Distancia Manhattan: {manhattan}\\n\")\n",
++    "\n",
++    "# A* search\n",
++    "def a_star(estado_inicial, estado_solucion):\n",
++    "    # Cola de prioridad con (f, estado) para A*\n",
++    "    open_list = []\n",
++    "    h_inicial = calcular_distancias_manhattan(estado_inicial, estado_solucion)\n",
++    "    heapq.heappush(open_list, (h_inicial, estado_inicial))  # Empujar el estado inicial con f = h\n",
++    "\n",
++    "    # g(n) es el costo real hasta el nodo, h(n) es la heurística (distancia Manhattan)\n",
++    "    g = {estado_inicial: 0}\n",
++    "    h = {estado_inicial: h_inicial}\n",
++    "\n",
++    "    came_from = {}  # Para reconstruir el camino\n",
++    "    closed_list = set()  # Lista cerrada para evitar ciclos\n",
++    "    \n",
++    "    while open_list:\n",
++    "        # Obtener el nodo con el menor f\n",
++    "        f, estado_actual = heapq.heappop(open_list)\n",
++    "        \n",
++    "        # Si encontramos la solución\n",
++    "        if estado_actual == estado_solucion:\n",
++    "            camino = []\n",
++    "            while estado_actual in came_from:\n",
++    "                camino.append(estado_actual)\n",
++    "                estado_actual = came_from[estado_actual]\n",
++    "            camino.append(estado_inicial)\n",
++    "            return camino[::-1]  # Devuelve el camino desde el inicio hasta la solución\n",
++    "\n",
++    "        closed_list.add(estado_actual)\n",
++    "        \n",
++    "        # Generar los estados posibles\n",
++    "        for vecino in calcular_movimientos(estado_actual):\n",
++    "            if vecino in closed_list:\n",
++    "                continue\n",
++    "\n",
++    "            tentative_g = g[estado_actual] + 1  # Cada movimiento tiene un costo de 1\n",
++    "\n",
++    "            # Si no hemos visto este estado antes o encontramos una mejor ruta\n",
++    "            if vecino not in g or tentative_g < g[vecino]:\n",
++    "                g[vecino] = tentative_g\n",
++    "                h[vecino] = calcular_distancias_manhattan(vecino, estado_solucion)\n",
++    "                f = g[vecino] + h[vecino]\n",
++    "                heapq.heappush(open_list, (f, vecino))\n",
++    "                came_from[vecino] = estado_actual\n",
++    "                \n",
++    "    return None  # Si no se encuentra la solución\n",
++    "\n",
++    "# Ejecutar A*\n",
++    "camino = a_star(estado_inicial, estado_solucion)\n",
++    "\n",
++    "# Imprimir el camino\n",
++    "if camino:\n",
++    "    for estado in camino:\n",
++    "        imprimir_puzzle(estado, calcular_distancias_manhattan(estado, estado_solucion))\n",
++    "        t.sleep(1)\n",
++    "    print(\"¡Solución encontrada!\")\n",
++    "else:\n",
++    "    print(\"No se pudo encontrar una solución.\")\n"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": 5,
++   "metadata": {},
++   "outputs": [
++    {
++     "name": "stdout",
++     "output_type": "stream",
++     "text": [
++      "El puzzle no tiene solución.\n"
++     ]
++    }
++   ],
++   "source": [
++    "def es_solucionable(estado):\n",
++    "    # Eliminar el cero (vacío) y contar el número de inversiones\n",
++    "    estado_sin_cero = [valor for valor in estado if valor != 0]\n",
++    "    \n",
++    "    inversiones = 0\n",
++    "    for i in range(len(estado_sin_cero)):\n",
++    "        for j in range(i + 1, len(estado_sin_cero)):\n",
++    "            if estado_sin_cero[i] > estado_sin_cero[j]:\n",
++    "                inversiones += 1\n",
++    "    \n",
++    "    # El puzzle es solucionable si el número de inversiones es par\n",
++    "    return inversiones % 2 == 0\n",
++    "\n",
++    "# Comprobación antes de intentar resolver\n",
++    "if es_solucionable(estado_inicial):\n",
++    "    camino = a_star(estado_inicial, estado_solucion)\n",
++    "    \n",
++    "    if camino:\n",
++    "        for estado in camino:\n",
++    "            imprimir_puzzle(estado, calcular_distancias_manhattan(estado, estado_solucion))\n",
++    "            t.sleep(1)\n",
++    "        print(\"¡Solución encontrada!\")\n",
++    "    else:\n",
++    "        print(\"No se pudo encontrar una solución.\")\n",
++    "else:\n",
++    "    print(\"El puzzle no tiene solución.\")\n"
++   ]
++  }
++ ],
++ "metadata": {
++  "kernelspec": {
++   "display_name": "laberinto",
++   "language": "python",
++   "name": "python3"
++  },
++  "language_info": {
++   "codemirror_mode": {
++    "name": "ipython",
++    "version": 3
++   },
++   "file_extension": ".py",
++   "mimetype": "text/x-python",
++   "name": "python",
++   "nbconvert_exporter": "python",
++   "pygments_lexer": "ipython3",
++   "version": "3.12.3"
++  }
++ },
++ "nbformat": 4,
++ "nbformat_minor": 2
++}
+
+
+Ruta: a/SBD/Sessio_06/Comandos.md
+Cambios:
+new file mode 100644
+index 00000000..d694d852
+--- /dev/null
++++ b/SBD/Sessio_06/Comandos.md
+@@ -0,0 +1,8 @@
++1. `./mongoimport --port 27018 --db ejercicio_movies --collection movies --file /home/andreuet/IABD/SBD/Sessio_05/movies.json --jsonArray --drop`
++2. `./mongoexport --port 27018 --db ejercicio_movies --collection movies --out /home/andreuet/IABD/SBD/Sessio_06/movies_export.json --jsonArray`
++3. `./mongoexport --port 27018 --db ejercicio_movies --collection movies --type=csv --fields=title,year --out /home/andreuet/IABD/SBD/Sessio_06/movies_export_cols.csv`
++4. `./mongodump --port 27018 --db ejercicio_movies --collection movies --out /home/andreuet/IABD/SBD/Sessio_06/ --gzip`
++5. `./mongoimport --port 27018 --db ejercicio_movies --collection movies_cols --type=csv --headerline --file /home/andreuet/IABD/SBD/Sessio_06/movies_export_cols.csv`
++6. `./mongodump --port 27018 --db ejercicio_movies --collection movies --out movies_collection`
++7. `./mongodump --port 27018 --db ejercicio_movies --out /home/andreuet/IABD/SBD/Sessio_06/movies_all --gzip`
++8. `./mongorestore --port 27018 --db ejercicio_restore --gzip /home/andreuet/IABD/SBD/Sessio_06/movies_all/ejercicio_movies/`
+\ No newline at end of file
